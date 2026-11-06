@@ -1,0 +1,45 @@
+/* 단락 내 이미지 */
+.report-body img,
+.report-h3 img {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    width: auto;
+    height: auto;
+    margin: 0.5rem auto;
+    object-fit: contain;
+    text-indent: 0;
+    user-select: none;
+}
+
+/* 뷰어 메인 컨테이너 */
+#viewer-container {
+    padding-top: 0px;
+    padding-bottom: 0px !important;
+}
+
+/* 페이지 래퍼 */
+.page-wrapper {
+    width: 794px;
+    margin-bottom: 1cm;
+    transition: width 0.15s ease, height 0.15s ease, margin-bottom 0.15s ease;
+}
+
+.page-wrapper:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* A4 용지 고정 규격 */
+.a4-paper {
+    width: 794px; 
+    height: 1123px !important;
+    background-color: #ffffff;
+    padding: 113px 76px 30px 76px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0,0,0,0.2);
+    transform-origin: top left;
+    user-select: text;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}

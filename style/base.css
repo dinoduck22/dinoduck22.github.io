@@ -1,0 +1,23 @@
+/* 신명조체 지정 */
+body {
+    font-family: 'ShinMyeongJo', 'Batang', 'Noto Serif KR', serif;
+    background-color: #e5e5e5;   /* 기존 #e2e8f0 */
+    overflow-x: hidden;
+    user-select: none;
+}
+
+/* 스크롤바 맞춤 디자인 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #d4d4d4;
+}
+::-webkit-scrollbar-thumb {
+    background: #a3a3a3;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #737373;
+}

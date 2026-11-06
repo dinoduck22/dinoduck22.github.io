@@ -1,6 +1,124 @@
 <!DOCTYPE html>
-<head></head>
-<title>home</title>
-<body>
-    <div>hello</div>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4 보고서 문서 에디터</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 외부 CSS 파일 연결 -->
+    <link rel="stylesheet" href="style/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start relative">
+
+    <!-- 상단 고정 툴바 (우측 상단 원래 위치로 복원) -->
+    <header class="no-print fixed top-4 right-4 z-40 flex items-center gap-2 bg-white/90 backdrop-blur border border-slate-300 shadow-md rounded-full px-3 py-1.5 text-xs text-slate-700">
+        <button id="btn-zoom-out" title="축소 (-)" class="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
+            <i class="fa-solid fa-minus w-4 h-4 flex items-center justify-center"></i>
+        </button>
+        <button id="btn-zoom-reset" title="기본 크기로 초기화" class="px-2 py-0.5 hover:bg-slate-100 rounded font-medium">
+            Reset
+        </button>
+        <button id="btn-zoom-in" title="확대 (+)" class="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
+            <i class="fa-solid fa-plus w-4 h-4 flex items-center justify-center"></i>
+        </button>
+        <div class="h-3 w-px bg-slate-300 mx-1"></div>
+        <button onclick="window.print()" title="인쇄하기" class="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
+            <i class="fa-solid fa-print w-4 h-4 flex items-center justify-center"></i>
+        </button>
+        <!-- 추가: 저장 아이콘 -->
+        <button id="btn-save" title="읽기 전용 문서로 저장" class="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
+            <i class="fa-solid fa-floppy-disk w-4 h-4 flex items-center justify-center"></i>
+        </button>
+    </header>
+
+    <!-- 좌측 페이지 구성 리스트 -->
+    <aside id="thumbnail-sidebar" class="no-print">
+        <div class="thumb-title">페이지</div>
+        <div id="thumbnail-list"></div>
+    </aside>
+
+    <!-- 단락 선택 시 상단에 떠있는 플로팅 버튼 그룹 (추가 / 삭제) -->
+    <div id="floating-action-bar" class="no-print absolute hidden z-30 flex items-center gap-1.5 -translate-x-1/2 -translate-y-full mb-1.5 bg-white/95 backdrop-blur px-2 py-1.5 rounded-full shadow-lg border border-slate-300">
+        <!-- 단락 추가 버튼: 흰색 바탕에 검은색 글씨 -->
+        <button id="floating-add-btn" class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 text-xs px-2.5 py-1 rounded-full transition-all flex items-center gap-1 font-medium shadow-sm">
+            <i class="fa-solid fa-plus text-[10px]"></i> 단락 추가
+        </button>
+        <!-- 단락 삭제 버튼: 검은색 바탕에 흰색 글씨 -->
+        <button id="floating-delete-btn" class="bg-slate-900 hover:bg-slate-800 text-white text-xs px-2.5 py-1 rounded-full transition-all flex items-center gap-1 font-medium shadow-sm">
+            <i class="fa-solid fa-trash-can text-[10px]"></i> 단락 삭제
+        </button>
+        <!-- 추가: 이미지 업로드 (아이콘 전용) -->
+        <button id="floating-image-btn" title="이미지 업로드"
+            class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 text-xs px-2.5 py-1 rounded-full transition-all flex items-center justify-center font-medium shadow-sm">
+            <i class="fa-regular fa-image text-[11px]"></i>
+        </button>
+    </div>
+
+    <!-- 문서 에디터 메인 영역 -->
+    <main id="viewer-container" class="w-full flex flex-col items-center pt-0 overflow-auto min-h-screen">
+        <!-- [1페이지 래퍼] -->
+        <div class="page-wrapper">
+            <article class="a4-paper relative text-slate-800">
+                <!-- 문서 헤더 -->
+                <header class="border-b border-slate-200 pb-4 mb-[2cm] page-header">
+                    <div class="text-center mb-4">
+                        <h1 class="report-title editable-field font-bold tracking-tight text-slate-900" contenteditable="true" data-placeholder="국문논문 제목 입력">국문논문 제목</h1>
+                        <h2 class="report-subtitle editable-field font-normal tracking-tight text-slate-700 mt-[1cm]" contenteditable="true" data-placeholder="영문 제목 입력">English Paper Title for Multi-page Structure Analysis</h2>
+                    </div>
+                    <div class="text-center mt-[3cm]">
+                        <p class="report-date editable-field text-slate-700 !text-indent-0" contenteditable="true" data-placeholder="2026. 00. 00">2026. 11. 06</p>
+                    </div>
+                </header>
+
+                <!-- 1페이지 본문 영역 (좌우 2단) -->
+                <div class="grid grid-cols-2 gap-8 mb-6 editor-content flex-1">
+                    <div class="space-y-6 column-left">
+                        <p class="report-h3 text-slate-900" contenteditable="true">1. 추진 개요</p>
+                        <p class="report-body text-slate-700" contenteditable="true">
+                            본 보고서는 2026년도 상반기 주요 사업 영역별 성과를 심층적으로 분석하고, 급변하는 글로벌 시장 환경 변화에 선제적으로 대응하기 위한 하반기 핵심 추진 과제 및 구체적인 실행 전략을 체계적으로 제시하는 데 목적이 있습니다.
+                        </p>
+                        <p class="report-body text-slate-700" contenteditable="true">
+                            특히 전통적인 비즈니스 모델에서 벗어나 인공지능(AI)과 클라우드 중심의 디지털 전환 가속화를 통해 기업 체질을 개선하고, 장기적인 성장 동력을 확보하는 데 역점을 두었습니다.
+                        </p>
+                        <p class="report-h3 text-slate-900" contenteditable="true">2. 주요 부문별 실적 현황</p>
+                        <p class="report-body text-slate-700" contenteditable="true">
+                            클라우드 솔루션 수주 부문에서는 전년 대비 공격적인 마케팅과 기술 지원을 바탕으로 목표치인 120억 원을 초과 달성하여 최종 142억 원을 기록(118.3%)하는 뛰어난 성과를 거두었습니다.
+                        </p>
+                    </div>
+                    <div class="space-y-6 column-right">
+                        <p class="report-h3 text-slate-900" contenteditable="true">3. 분기별 성장 추이</p>
+                        <p class="report-body text-slate-700" contenteditable="true">
+                            전년도 동기 대비 전사 매출 성장률은 +24.8%로 매우 견조한 상향 곡선을 지속하고 있습니다. 특히 Q1 대비 Q2 영역에서 AI 관련 고성능 인프라 공급 계약이 대거 성사됨에 따라 수익성이 한층 더 탄력을 받았습니다.
+                        </p>
+                        <p class="report-h3 text-slate-900" contenteditable="true">4. 하반기 핵심 실행 전략</p>
+                        <p class="report-body text-slate-700" contenteditable="true">
+                            첫째, AI 및 데이터 부문 역량 강화를 위하여 차세대 대규모 모델 연동 파이프라인을 확충하고, 고성능 컴퓨팅 인프라에 대한 전략적 투자를 단행하여 원천적인 제품 경쟁력을 공고히 합니다.
+                        </p>
+                    </div>
+                </div>
+
+                <footer class="mt-auto pt-6  border-slate-200 text-center page-footer">
+                    <p class="report-h3 text-slate-900 mb-0 page-number">1</p>
+                </footer>
+            </article>
+        </div>
+
+    </main>
+
+    <!-- 줌 뱃지 -->
+    <div id="zoom-badge" class="no-print fixed bottom-12 left-1/2 -translate-x-1/2 z-50 glass-pill px-5 py-2.5 rounded-full shadow-xl flex items-center gap-3 text-slate-900 text-sm font-medium tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none">
+        <i class="fa-solid fa-magnifying-glass text-xs text-slate-700"></i>
+        <span>확대 비율:</span>
+        <span id="zoom-percentage" class="font-bold text-slate-900 w-12 text-center">100%</span>
+    </div>
+
+    <!-- 외부 JS 파일 연결 (type="module" 필수) -->
+    <script type="module" src="script/main.js"></script>
 </body>
+</html>

@@ -1,0 +1,45 @@
+/* 인쇄 설정 */
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    body {
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .no-print {
+        display: none !important;
+    }
+    #viewer-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        min-height: auto !important;
+        display: block !important;
+    }
+    .page-wrapper {
+        width: 794px !important;
+        height: 1123px !important;
+        margin-bottom: 0 !important;
+        page-break-after: always;
+        break-after: page;
+    }
+    .a4-paper {
+        box-shadow: none !important;
+        transform: none !important;
+        width: 794px !important;
+        height: 1123px !important;
+        padding: 113px 76px 60px 76px !important;
+    }
+    .multi-selected {
+        background: none !important;
+        box-shadow: none !important;
+    }
+    [contenteditable]:focus { 
+        box-shadow: none !important; 
+        background: none !important; 
+    }
+}
